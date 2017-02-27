@@ -18,8 +18,11 @@
 // Circular Buffer implementation
 //
 // Error defines:
-// -1 : null pointer passed
-// -2 : length too short
+// -1	: null CircularBuffer pointer passed.
+// -2	: null CircularBuffer->buffer pointer passed.
+// -3	: null in/out buffer passed.
+// -10	: buffer length too short.
+
 
 #ifdef __cplusplus
 extern "C" 
@@ -30,13 +33,27 @@ extern "C"
 #include <stdlib.h>
 #include <string.h>
 
+
+typedef struct CircularBuffer
+{
+	size_t head;
+	size_t tail;
+	size_t bufferLength;
+	uint8_t* buffer;
+
+} CircularBuffer;
+
+// Returns memory required to maintain an instance of CircularBuffer. 
+// This is all overhead; useable buffer is in addition to this minimim.
+#define CircularBuffer_MinimumLength (1)
+
 // Initalizes a new instance of circular buffer.
 // Parameters:
 //	circularBuffer	- opaque pointer to circularBuffer instance.
 //	emptyMemory		- initalized memory to use for the buffer. !! Allocation of memory must last the duration of buffer usage.
 //	length			- length of array passed. Minimum length returned by CircularBuffer_GetMinimumLength.
 //  Errors (negatives) or length of bytes in circular buffer usable for data storage (positive)
-int CircularBuffer_Init(void** circularBuffer, uint8_t*  emptyMemory, size_t length);
+int CircularBuffer_Init(CircularBuffer* circularBuffer);
 
 // Writes byte-wise to buffer.
 // Parameters:
@@ -45,7 +62,7 @@ int CircularBuffer_Init(void** circularBuffer, uint8_t*  emptyMemory, size_t len
 //	length			- length of byte array to write. -- can be longer than circular buffer but first values stored will be overwritten.
 // Returns:
 //  Errors (negatives) or number of bytes written (positive)
-int CircularBuffer_Write(void* circularBuffer, uint8_t* bytesIn, size_t length);
+int CircularBuffer_Write(CircularBuffer* circularBuffer, uint8_t* bytesIn, size_t length);
 
 // Reads byte-wise to buffer.
 // Parameters:
@@ -54,11 +71,7 @@ int CircularBuffer_Write(void* circularBuffer, uint8_t* bytesIn, size_t length);
 //	length			- length of byte array to read. -- can be longer than circular buffer but those bytes will go unwritten.
 // Returns:
 //  Errors (negatives) or number of bytes read (positive)
-int CircularBuffer_Read(void* circularBuffer, uint8_t* bytesOut, size_t length);
-
-// Returns memory required to maintain an instance of CircularBuffer. 
-// This is all overhead; useable buffer is in addition to this minimim.
-size_t CircularBuffer_GetMinimumLength(void);
+int CircularBuffer_Read(CircularBuffer* circularBuffer, uint8_t* bytesOut, size_t length);
 
 #ifdef __cplusplus
 }

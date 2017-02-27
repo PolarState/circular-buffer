@@ -4,57 +4,70 @@
 
 TEST(circular_buffer_init, empty)
 {
-	void*	b;
-	void*	placeholder = b;
-	uint	l = 0;
-	uint8_t a[l];
+	uint			l = 0;
+	uint8_t 		a[l];
+	CircularBuffer	b = 
+	{
+		.head = 0,
+		.tail = 0,
+		.buffer = a,
+		.bufferLength = l,
+	};
 
-	EXPECT_EQ(-2, CircularBuffer_Init(&b, a, l));
-	EXPECT_EQ(b, placeholder);
-	EXPECT_NE(b, (void*)a);
+	EXPECT_EQ(-10, CircularBuffer_Init(&b));
 }
 
 TEST(circular_buffer_init, invalid_min)
 {
-	void*	b;
-	void*	placeholder = b;
-	uint	l = CircularBuffer_GetMinimumLength();
-	uint8_t a[l];
+	uint			l = CircularBuffer_MinimumLength;
+	uint8_t 		a[l];
+	CircularBuffer	b = 
+	{
+		.head = 0,
+		.tail = 0,
+		.buffer = a,
+		.bufferLength = l,
+	};
 
-	EXPECT_NE(0, l);
-	EXPECT_EQ(-2, CircularBuffer_Init(&b, a, l));
-	EXPECT_EQ(b, placeholder);
-	EXPECT_NE(b, (void*)a);
+	EXPECT_EQ(-10, CircularBuffer_Init(&b));
 }
 
 TEST(circular_buffer_init, valid_min)
 {
-	void*	b;
-	void*	placeholder = b;
-	uint	l = CircularBuffer_GetMinimumLength() + 2;
-	uint8_t a[l];
+	uint			l = CircularBuffer_MinimumLength + 2;
+	uint8_t 		a[l];
+	CircularBuffer	b = 
+	{
+		.head = 0,
+		.tail = 0,
+		.buffer = a,
+		.bufferLength = l,
+	};
 
-	EXPECT_NE(2, l);
-	EXPECT_EQ(2, CircularBuffer_Init(&b, a, l));
-	EXPECT_NE(b, placeholder);
-	EXPECT_EQ(b, (void*)a);
+	EXPECT_EQ(2, CircularBuffer_Init(&b));
 }
 
 TEST(circular_buffer_rw, single_byte)
 {
 	// circular buffer variables
-	void*	buffer;
-	uint	memoryLength = CircularBuffer_GetMinimumLength() + 10;
-	uint8_t memory[memoryLength];
+	uint			memoryLength = CircularBuffer_MinimumLength + 10;
+	uint8_t 		memory[memoryLength];
+	CircularBuffer	buffer = 
+	{
+		.head = 0,
+		.tail = 0,
+		.buffer = memory,
+		.bufferLength = memoryLength,
+	};
 
 	// bytes to write
 	uint8_t byteIn = 0xff;
 	uint8_t byteOut = 0x00;
 
-	EXPECT_EQ(10, CircularBuffer_Init(&buffer, memory, memoryLength));
+	EXPECT_EQ(10, CircularBuffer_Init(&buffer));
 
-	EXPECT_EQ(1, CircularBuffer_Write(buffer, &byteIn, 1));
-	EXPECT_EQ(1, CircularBuffer_Read(buffer, &byteOut, 1));
+	EXPECT_EQ(1, CircularBuffer_Write(&buffer, &byteIn, 1));
+	EXPECT_EQ(1, CircularBuffer_Read(&buffer, &byteOut, 1));
 
 	EXPECT_EQ(byteIn, byteOut);
 }
@@ -62,10 +75,17 @@ TEST(circular_buffer_rw, single_byte)
 TEST(circular_buffer_rw, overflow_SingleWrite)
 {
 	// circular buffer variables
-	void*	buffer;
-	uint	bufferLength = 10;
-	uint	memoryLength = CircularBuffer_GetMinimumLength() + bufferLength;
-	uint8_t memory[memoryLength];
+	uint			bufferLength = 10;
+	uint			memoryLength = CircularBuffer_MinimumLength + bufferLength;
+	uint8_t 		memory[memoryLength];
+	CircularBuffer	buffer = 
+	{
+		.head = 0,
+		.tail = 0,
+		.buffer = memory,
+		.bufferLength = memoryLength,
+	};
+
 
 	// bytes to write
 	uint	byteLength = 12;
@@ -77,10 +97,10 @@ TEST(circular_buffer_rw, overflow_SingleWrite)
 		bytesIn[i] = i;
 	}
 
-	EXPECT_EQ(bufferLength, CircularBuffer_Init(&buffer, memory, memoryLength));
+	EXPECT_EQ(bufferLength, CircularBuffer_Init(&buffer));
 
-	EXPECT_EQ(byteLength, CircularBuffer_Write(buffer, bytesIn, byteLength));
-	EXPECT_EQ(bufferLength, CircularBuffer_Read(buffer, bytesOut, bufferLength));
+	EXPECT_EQ(byteLength, CircularBuffer_Write(&buffer, bytesIn, byteLength));
+	EXPECT_EQ(bufferLength, CircularBuffer_Read(&buffer, bytesOut, bufferLength));
 
 	EXPECT_EQ(0, memcmp(&bytesIn[2], &bytesOut[0], bufferLength));
 }
@@ -88,17 +108,23 @@ TEST(circular_buffer_rw, overflow_SingleWrite)
 TEST(circular_buffer_rw, read_without_write)
 {
 	// circular buffer variables
-	void*	buffer;
-	uint	memoryLength = CircularBuffer_GetMinimumLength() + 10;
+	uint	memoryLength = CircularBuffer_MinimumLength + 10;
 	uint8_t memory[memoryLength];
+	CircularBuffer	buffer = 
+	{
+		.head = 0,
+		.tail = 0,
+		.buffer = memory,
+		.bufferLength = memoryLength,
+	};
 
 	// bytes to write
 	uint8_t byteIn = 0xff;
 	uint8_t byteOut = 0x00;
 
-	EXPECT_EQ(10, CircularBuffer_Init(&buffer, memory, memoryLength));
+	EXPECT_EQ(10, CircularBuffer_Init(&buffer));
 
-	EXPECT_EQ(0, CircularBuffer_Read(buffer, &byteOut, 1));
+	EXPECT_EQ(0, CircularBuffer_Read(&buffer, &byteOut, 1));
 
 	EXPECT_EQ(0x00, byteOut);
 }

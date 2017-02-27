@@ -19,21 +19,6 @@ extern "C"
 {
 #endif // __cplusplus
 
-typedef struct CircularBuffer
-{
-	size_t head;
-	size_t tail;
-	size_t bufferLength;
-	uint8_t* buffer;
-
-} CircularBuffer;
-
-
-size_t CircularBuffer_GetMinimumLength(void)
-{
-	return(sizeof(CircularBuffer)+1);
-}
-
 size_t CB_Peek(CircularBuffer*c, size_t p)
 {
 	if(p == c->bufferLength - 1)
@@ -74,43 +59,44 @@ void CB_IncrementHead(CircularBuffer* c)
 		c->head++;
 }
 
-int CircularBuffer_Init(void** circularBuffer, uint8_t* emptyMemory, size_t length)
+int CB_IsCBValid(CircularBuffer* c)
 {
-	// verify parameters
-	if(circularBuffer == 0)
+	if(c == 0)
 		return(-1);
 
-	if(emptyMemory == 0)
-		return(-1);
-
-	if(length < (CircularBuffer_GetMinimumLength() + 2))
+	if(c->buffer == 0)
 		return(-2);
 
-	memset(emptyMemory, 0x00, length);
+	if(c->bufferLength <= CircularBuffer_MinimumLength)
+		return(-10);
 
-	CircularBuffer* c = (CircularBuffer*)emptyMemory;
-	c->head = 0;
-	c->tail = 0;
-	c->bufferLength = length - CircularBuffer_GetMinimumLength() + 1;
-	c->buffer = emptyMemory + sizeof(size_t) * 3 + sizeof(uint8_t*);
-
-	*circularBuffer = c;
-
-	return(c->bufferLength - 1);
+	return(1);
 }
 
-int CircularBuffer_Write(void* circularBuffer, uint8_t* bytesIn, size_t length)
+int CircularBuffer_Init(CircularBuffer* c)
 {
-	if(circularBuffer == 0)
-		return(-1);
+	int error;
+
+	// verify parameters
+	if((error = CB_IsCBValid(c)) != 1)
+		return(error);
+
+	c->head = 0;
+	c->tail = 0;
+
+	return(c->bufferLength - CircularBuffer_MinimumLength);
+}
+
+int CircularBuffer_Write(CircularBuffer* c, uint8_t* bytesIn, size_t length)
+{
+	int error;
+
+	// verify parameters
+	if((error = CB_IsCBValid(c)) != 1)
+		return(error);
 
 	if(bytesIn == 0)
-		return(-1);
-
-	if(length == 0)
-		return(-2);
-
-	CircularBuffer* c = (CircularBuffer*)circularBuffer;
+		return(-3);
 
 	for(int i = 0; i < length; i++)
 	{
@@ -121,19 +107,18 @@ int CircularBuffer_Write(void* circularBuffer, uint8_t* bytesIn, size_t length)
 	return(length);
 }
 
-int CircularBuffer_Read(void* circularBuffer, uint8_t* bytesOut, size_t length)
+int CircularBuffer_Read(CircularBuffer* c, uint8_t* bytesOut, size_t length)
 {
-	if(circularBuffer == 0)
-		return(-1);
+	int error;
+
+	// verify parameters
+	if((error = CB_IsCBValid(c)) != 1)
+		return(error);
 
 	if(bytesOut == 0)
-		return(-1);
-
-	if(length == 0)
-		return(-2);
+		return(-3);
 
 	int readBytes = 0;
-	CircularBuffer* c = (CircularBuffer*)circularBuffer;
 
 	for(int i = 0; i < length; i++)
 	{

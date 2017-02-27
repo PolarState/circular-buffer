@@ -9,7 +9,7 @@ Implementation is targeted at embedded systems and therefore has no dependencies
 - add exhaustive tests
 - remove compiled gtest_main.a library.
 - add cmake build script for test (increases portability)
-
+- fix static allocation issues (uint8_t buffer cannot be statically allocated due to the reliance on the CircularBuffer_GetMinimumLength() call.)
 
 
 ## Usage:

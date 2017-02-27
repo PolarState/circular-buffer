@@ -6,7 +6,6 @@ This circular-buffer implementation can be used to store arbitrary bytes as well
 Implementation is targeted at embedded systems and therefore has no dependencies outside of the c standard library. Test setup is using gcc and the library for gtest_main.a was compiled on a mac.
 
 ## TODO:
-- move source out of test (currently there to make makefile eaiser to write)
 - add exhaustive tests
 - remove compiled gtest_main.a library.
 - add cmake build script for test (increases portability)

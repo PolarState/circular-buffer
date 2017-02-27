@@ -1,23 +1,24 @@
-
 SOURCE	= circular-buffer.c.o
 SOURCE 	+= circular-buffer-test.cpp.o
 
-INCLUDE =  -I /Users/Dakota/Source/external/googletest/googletest/include
+INCLUDE =  -I /Users/Dakota/Source/external/googletest/googletest/include -I ../
 LIBS = gtest_main.a
+
+OUTPUT = test
 
 CC	= gcc
 CPP	= g++
 LD	= ld
 
-%.c.o: %.c circular-buffer.h
+all: $(SOURCE) $(LIBS)
+	$(CPP) $^ -o $(OUTPUT)
+
+circular-buffer.c.o: ../circular-buffer.c ../circular-buffer.h
 	$(CC) $(INCLUDE) -c -o $@ $<
 
-%.cpp.o: %.cpp circular-buffer.h
+circular-buffer-test.cpp.o: circular-buffer-test.cpp ../circular-buffer.h
 	$(CPP) $(INCLUDE) -c -o $@ $<
 
-all: $(SOURCE) $(LIBS)
-	$(CPP) $^ -o output
-	
 .PHONY: clean
 clean:
-	rm *.o
+	rm *.o $(OUTPUT)

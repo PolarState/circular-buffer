@@ -38,18 +38,16 @@ typedef struct CircularBuffer
 {
 	size_t head;
 	size_t tail;
+	size_t bytesAvailable;
 	size_t bufferLength;
 	uint8_t* buffer;
 
 } CircularBuffer;
 
-// Returns memory required to maintain an instance of CircularBuffer. 
-// This is all overhead; useable buffer is in addition to this minimim.
-#define CircularBuffer_MinimumLength (1)
 
 // Initalizes a new instance of circular buffer.
 // Parameters:
-//	circularBuffer	- opaque pointer to circularBuffer instance.
+//	circularBuffer	- pointer to circularBuffer instance.
 //	emptyMemory		- initalized memory to use for the buffer. !! Allocation of memory must last the duration of buffer usage.
 //	length			- length of array passed. Minimum length returned by CircularBuffer_GetMinimumLength.
 //  Errors (negatives) or length of bytes in circular buffer usable for data storage (positive)
@@ -57,7 +55,7 @@ int CircularBuffer_Init(CircularBuffer* circularBuffer);
 
 // Writes byte-wise to buffer.
 // Parameters:
-//	circularBuffer	- opaque pointer to circularBuffer instance.
+//	circularBuffer	- pointer to circularBuffer instance.
 //	bytesIn			- byte array to write into buffer.
 //	length			- length of byte array to write. -- can be longer than circular buffer but first values stored will be overwritten.
 // Returns:
@@ -66,12 +64,28 @@ int CircularBuffer_Write(CircularBuffer* circularBuffer, uint8_t* bytesIn, size_
 
 // Reads byte-wise to buffer.
 // Parameters:
-//	circularBuffer	- opaque pointer to circularBuffer instance.
+//	circularBuffer	- pointer to circularBuffer instance.
 //	bytesIn			- byte array to read into buffer.
 //	length			- length of byte array to read. -- can be longer than circular buffer but those bytes will go unwritten.
 // Returns:
 //  Errors (negatives) or number of bytes read (positive)
 int CircularBuffer_Read(CircularBuffer* circularBuffer, uint8_t* bytesOut, size_t length);
+
+// Coppies byte-wise to buffer. Does not remove data coppied from buffer.
+// Parameters:
+//	circularBuffer	- pointer to circularBuffer instance.
+//	arrayOut		- byte array to read into buffer.
+//	length			- length of byte array to copy. -- can be longer than circular buffer but those bytes will go unwritten.
+// Returns:
+//  Errors (negatives) or number of bytes read (positive)
+int CircularBuffer_CopyToArray(CircularBuffer* circularBuffer, uint8_t* arrayOut, size_t length);
+
+// Bytes available to read.
+// Parameters:
+//	circularBuffer	- pointer to circularBuffer instance.
+// Returns:
+//  Errors (negatives) or number of bytes available (positive).
+int CircularBuffer_GetAvailableBytes(CircularBuffer* circularBuffer);
 
 #ifdef __cplusplus
 }

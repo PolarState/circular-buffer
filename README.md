@@ -9,7 +9,6 @@ Implementation is targeted at embedded systems and therefore has no dependencies
 - add exhaustive tests
 - remove compiled gtest_main.a library.
 - add cmake build script for test (increases portability)
-- fix static allocation issues (uint8_t buffer cannot be statically allocated due to the reliance on the CircularBuffer_GetMinimumLength() call.)
 
 
 ## Usage:
@@ -18,10 +17,15 @@ simply copy source files to import circular-buffer 'library'
 ```
 	// circular buffer parameters
 	// this buffer has 10 bytes of storage for the user.
-	void*	buffer;
-	uint	memoryLength = CircularBuffer_GetMinimumLength() + 10; // the + 10 here tells the 'library' how many bytes to allocate for the user
+	uint	memoryLength = 10;
 	uint8_t memory[memoryLength];
-
+	CircularBuffer	buffer = 
+	{
+		.head = 0,
+		.tail = 0,
+		.buffer = memory,
+		.bufferLength = memoryLength,
+	};
 
 	// bytes to write
 	uint8_t byteIn = 0xff;
@@ -44,12 +48,12 @@ simply copy source files to import circular-buffer 'library'
 	// buffer read and write examples
 
 	// single bytes
-	CircularBuffer_Write(buffer, &byteIn, 1);
-	CircularBuffer_Read(buffer, &byteOut, 1);
+	CircularBuffer_Write(&buffer, &byteIn, 1);
+	CircularBuffer_Read(&buffer, &byteOut, 1);
 
 	// multiple bytes
-	byteLength, CircularBuffer_Write(buffer, bytesIn, byteLength);
-	bufferLength, CircularBuffer_Read(buffer, bytesOut, bufferLength);
+	CircularBuffer_Write(&buffer, bytesIn, byteLength);
+	CircularBuffer_Read(&buffer, bytesOut, bufferLength);
 
 ```
 

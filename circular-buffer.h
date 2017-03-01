@@ -21,6 +21,8 @@
 // -1	: null CircularBuffer pointer passed.
 // -2	: null CircularBuffer->buffer pointer passed.
 // -3	: null in/out buffer passed.
+// -4	: null CircularBuffer_ImmutableCopy passed.
+// -5   : null CircularBuffer pointer in CircularBuffer_ImmutableCopy.
 // -10	: buffer length too short.
 
 
@@ -43,6 +45,14 @@ typedef struct CircularBuffer
 	uint8_t* buffer;
 
 } CircularBuffer;
+
+typedef struct CircularBuffer_ImmutableCopy
+{
+	size_t tail;
+	size_t bytesAvailable;
+	CircularBuffer* original;
+
+} CircularBuffer_ImmutableCopy;
 
 
 // Initalizes a new instance of circular buffer.
@@ -86,6 +96,19 @@ int CircularBuffer_CopyToArray(CircularBuffer* circularBuffer, uint8_t* arrayOut
 // Returns:
 //  Errors (negatives) or number of bytes available (positive).
 int CircularBuffer_GetAvailableBytes(CircularBuffer* circularBuffer);
+
+//// WARNING ////
+// Immutable coppies will not be updated automatically when the original CircularBuffer is updated.
+// TODO: add function to syncronize the immutable and mutable buffers.
+
+// Makes an immutable copy of an existing CircularBuffer. This new object can be statefully read from without dequeueing data.
+int CircularBuffer_Copy(CircularBuffer* circularBuffer, CircularBuffer_ImmutableCopy* circularBuffer_ImmutableCopyOut);
+
+// Reads from an immutable circular buffer. State of the read pointer persists but data is not dequeued.
+int CircularBuffer_ImmutableRead(CircularBuffer_ImmutableCopy* circularBuffer_ImmutableCopy, uint8_t* bytesOut, size_t length);
+
+// Seed randomly within an immutable circular buffer. This primarily allows resetting of the read pointer (tail).
+// int CircularBuffer_ImmutableSeek(CircularBuffer_ImmutableCopy* circularBuffer_ImmutableCopy, offset);
 
 #ifdef __cplusplus
 }
